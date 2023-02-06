@@ -244,7 +244,7 @@ class _FunctionSoftsplat(torch.autograd.Function):
 		intSamples = input.shape[0]
 		intInputDepth, intInputHeight, intInputWidth = input.shape[1], input.shape[2], input.shape[3]
 		intFlowDepth, intFlowHeight, intFlowWidth = flow.shape[1], flow.shape[2], flow.shape[3]
-
+		flow = flow.contiguous()
 		assert(intFlowDepth == 2)
 		assert(intInputHeight == intFlowHeight)
 		assert(intInputWidth == intFlowWidth)
