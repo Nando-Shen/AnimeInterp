@@ -232,7 +232,7 @@ def get_guidance_flow(label_map1, label_map2, img1, img2,
     color_patch1 = show_fill_map(label_map1)
     color_patch2 = show_fill_map(label_map2)
 
-    flowObj = cv2.optflow.createOptFlow_DIS(cv2.optflow.DISOpticalFlow_PRESET_MEDIUM)
+    flowObj = cv2.optflow.createOptFlow_DIS(cv2.DISOpticalFlow_PRESET_MEDIUM)
     # flowObj.setUseMeanNormalization(False)
     # flowObj.setUseSpatialPropagation(False)
     flowObj.setVariationalRefinementIterations(25)
