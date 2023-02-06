@@ -205,8 +205,8 @@ def get_deformable_flow(flowObj, img1, mask_1, box_1,
         fwarp_mask_close = fwarp_mask
         fwarp_mask_close[fwarp_mask_close<0.05] = 0
         
-        union_region = np.logical_and(fwarp_mask_close.astype(np.bool), mask2_patch_pad.astype(np.bool))
-        union_rate = np.sum(union_region.astype(np.bool))/np.sum(fwarp_mask_close.astype(np.bool))
+        union_region = np.logical_and(fwarp_mask_close.astype(bool), mask2_patch_pad.astype(bool))
+        union_rate = np.sum(union_region.astype(bool))/np.sum(fwarp_mask_close.astype(bool))
 
     ###
     mask1_patch_pad = np.pad(mask1_patch, ([H_front_pad, H_back_pad], [W_front_pad, W_back_pad]), mode='constant')
@@ -521,8 +521,8 @@ if __name__ == "__main__":
         lH, lW = labelMap1.shape
         gridX, gridY = np.meshgrid(np.arange(lW), np.arange(lH))
 
-        gridX_flat = torch.tensor(gridX.astype(np.float), requires_grad=False).reshape(lH*lW)
-        gridY_flat = torch.tensor(gridY.astype(np.float), requires_grad=False).reshape(lH*lW)
+        gridX_flat = torch.tensor(gridX.astype(float), requires_grad=False).reshape(lH*lW)
+        gridY_flat = torch.tensor(gridY.astype(float), requires_grad=False).reshape(lH*lW)
 
         labelMap1_flat = torch.tensor(labelMap1.reshape(lH*lW)).long()
         labelMap3_flat = torch.tensor(labelMap3.reshape(lH*lW)).long()
