@@ -420,7 +420,7 @@ if __name__ == "__main__":
         temp = []
         for name in imgFileNames:
             if name.__contains__('frame'):
-                temp.add(name)
+                temp.append(name)
         imgFileNames = temp
 
         print('-- [%d/%d] %s'%(f_idx, end_idx-1, folder))
