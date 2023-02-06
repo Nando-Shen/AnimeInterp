@@ -417,7 +417,10 @@ if __name__ == "__main__":
 
         input_subfolder = os.path.join(folder_root, folder)
         imgFileNames = sorted(os.listdir(input_subfolder))
-        
+        for name in imgFileNames:
+            if not name.__contains__('frame'):
+                imgFileNames.remove(name)
+
         print('-- [%d/%d] %s'%(f_idx, end_idx-1, folder))
         print(imgFileNames)
         sys.stdout.flush()
