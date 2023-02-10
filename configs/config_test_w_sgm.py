@@ -16,6 +16,8 @@ pwc_path = None
 
 checkpoint = 'checkpoints/anime_interp_full.ckpt'
 
+loss = '1*L1'
+
 store_path = 'outputs/avi_full_results'
 
 
