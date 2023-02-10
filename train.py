@@ -19,6 +19,7 @@ from utils.vis_flow import flow_to_color
 import json
 from loss import Loss
 from skimage.measure import compare_psnr, compare_ssim
+from torch.optim import Adamax
 
 # loading configures
 parser = argparse.ArgumentParser()
@@ -44,9 +45,13 @@ if not os.path.exists(config.store_path):
 
 testset = datas.AniTripletWithSGMFlowTest(config.testset_root, config.test_flow_root, trans, config.test_size,
                                           config.test_crop_size, train=False)
-
+trainset = datas.AniTripletWithSGMFlowTest(config.trainset_root, config.train_flow_root, trans, config.train_size,
+                                          config.test_crop_size, train=False)
 sampler = torch.utils.data.SequentialSampler(testset)
+trainsampler = torch.utils.data.SequentialSampler(trainset)
+
 validationloader = torch.utils.data.DataLoader(testset, sampler=sampler, batch_size=1, shuffle=False, num_workers=1)
+trainloader = torch.utils.data.DataLoader(trainset, sampler=trainsampler, batch_size=6, shuffle=False, num_workers=1)
 
 to_img = TF.ToPILImage()
 
@@ -65,6 +70,7 @@ store_path = config.store_path
 
 # loss function
 criterion = Loss(args)
+optimizer = Adamax(model.parameters(), lr=args.lr, betas=(0.9, 0.999))
 
 def save_flow_to_img(flow, des):
         f = flow[0].data.cpu().numpy().transpose([1, 2, 0])
@@ -84,12 +90,11 @@ def train(config):
 
     folders = []
 
-    print('Everything prepared. Ready to test...')
+    print('Everything prepared. Ready to train...')
     sys.stdout.flush()
 
     model.train()
-    ii = 0
-    for validationIndex, validationData in enumerate(validationloader, 0):
+    for validationIndex, validationData in enumerate(trainloader, 0):
         print('Training {}/{}-th group...'.format(validationIndex, len(testset)))
         sys.stdout.flush()
         sample, flow, index, folder = validationData
@@ -116,6 +121,7 @@ def train(config):
 
         revtrans(I1.cpu()[0]).save(store_path + '/' + folder[0][0] + '/' + index[0][0] + '.jpg')
         revtrans(I2.cpu()[0]).save(store_path + '/' + folder[-1][0] + '/' + index[-1][0] + '.jpg')
+
         for tt in range(config.inter_frames):
             x = config.inter_frames
             t = 1.0 / (x + 1) * (tt + 1)
@@ -124,8 +130,8 @@ def train(config):
 
             It_warp = outputs[0]
 
-            to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(
-                store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
+            # to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(
+            #     store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
 
             estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
             gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
@@ -133,6 +139,10 @@ def train(config):
             # whole image value
             this_psnr = compare_psnr(estimated, gt)
             this_ssim = compare_ssim(estimated, gt, multichannel=True, gaussian=True)
+
+            loss, _ = criterion(estimated, gt)
+            loss.backward()
+            optimizer.step()
 
             psnrs[validationIndex][tt] = this_psnr
             ssims[validationIndex][tt] = this_ssim
@@ -142,6 +152,9 @@ def train(config):
 
     psnr_whole /= (len(testset) * config.inter_frames)
     ssim_whole /= (len(testset) * config.inter_frames)
+    print('Train Epoch: {} \tPSNR: {:.4f} \tSSIM: {:.4f}\t Lr:{:.6f}'.format(
+        epoch, psnr_whole, ssim_whole, optimizer.param_groups[0]['lr'], flush=True))
+
     return None
 
 
@@ -256,6 +269,7 @@ if __name__ == "__main__":
 
     for epoch in range(0, args.max_epoch):
         train(config)
+
         #torch.save()
 
 
