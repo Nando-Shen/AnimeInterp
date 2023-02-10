@@ -12,13 +12,14 @@ import os
 from math import log10
 import numpy as np
 import datetime
+
+from models import myutils
 from utils.config import Config
 import sys
 import cv2
 from utils.vis_flow import flow_to_color
 import json
 from loss import Loss
-from skimage.measure import compare_psnr, compare_ssim
 from torch.optim import Adamax
 
 # loading configures
@@ -83,11 +84,11 @@ def save_flow_to_img(flow, des):
 def train(config):
 
     ## values for whole image
-    psnr_whole = 0
-    psnrs = np.zeros([len(testset), config.inter_frames])
-    ssim_whole = 0
-    ssims = np.zeros([len(testset), config.inter_frames])
-
+    # psnr_whole = 0
+    # psnrs = np.zeros([len(testset), config.inter_frames])
+    # ssim_whole = 0
+    # ssims = np.zeros([len(testset), config.inter_frames])
+    losses, psnrs, ssims = myutils.init_meters(args.loss)
     folders = []
 
     print('Everything prepared. Ready to train...')
@@ -137,23 +138,25 @@ def train(config):
             gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
 
             # whole image value
-            this_psnr = compare_psnr(estimated, gt)
-            this_ssim = compare_ssim(estimated, gt, multichannel=True, gaussian=True)
+            # this_psnr = compare_psnr(estimated, gt)
+            # this_ssim = compare_ssim(estimated, gt, multichannel=True, gaussian=True)
+            myutils.eval_metrics(estimated, gt, psnrs, ssims)
 
             loss, _ = criterion(estimated, gt)
+            losses['total'].update(loss.item())
             loss.backward()
             optimizer.step()
 
-            psnrs[validationIndex][tt] = this_psnr
-            ssims[validationIndex][tt] = this_ssim
+            # psnrs[validationIndex][tt] = this_psnr
+            # ssims[validationIndex][tt] = this_ssim
+            #
+            # psnr_whole += this_psnr
+            # ssim_whole += this_ssim
 
-            psnr_whole += this_psnr
-            ssim_whole += this_ssim
-
-    psnr_whole /= (len(testset) * config.inter_frames)
-    ssim_whole /= (len(testset) * config.inter_frames)
-    print('Train Epoch: {} \tPSNR: {:.4f} \tSSIM: {:.4f}\t Lr:{:.6f}'.format(
-        epoch, psnr_whole, ssim_whole, optimizer.param_groups[0]['lr'], flush=True))
+    # psnr_whole /= (len(testset) * config.inter_frames)
+    # ssim_whole /= (len(testset) * config.inter_frames)
+    print('Train Epoch: {}\tLoss: {:.6f} \tPSNR: {:.4f} \tSSIM: {:.4f}\t Lr:{:.6f}'.format(
+        epoch,losses['total'].avg, psnrs.avg, ssims.avg,optimizer.param_groups[0]['lr'], flush=True))
 
     return None
 
@@ -191,10 +194,11 @@ def validate(config):
     store_path = config.store_path
 
     ## values for whole image
-    psnr_whole = 0
-    psnrs = np.zeros([len(testset), config.inter_frames])
-    ssim_whole = 0
-    ssims = np.zeros([len(testset), config.inter_frames])
+    # psnr_whole = 0
+    # psnrs = np.zeros([len(testset), config.inter_frames])
+    # ssim_whole = 0
+    # ssims = np.zeros([len(testset), config.inter_frames])
+    losses, psnrs, ssims = myutils.init_meters(args.loss)
 
     folders = []
 
@@ -202,8 +206,12 @@ def validate(config):
     sys.stdout.flush()
 
     #  start testing...
+
+    model.eval()
+    criterion.eval()
+    torch.cuda.empty_cache()
+
     with torch.no_grad():
-        model.eval()
         ii = 0
         for validationIndex, validationData in enumerate(validationloader, 0):
             print('Testing {}/{}-th group...'.format(validationIndex, len(testset)))
@@ -247,22 +255,23 @@ def validate(config):
                 gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0) 
 
                 # whole image value
-                this_psnr = compare_psnr(estimated, gt)
-                this_ssim = compare_ssim(estimated, gt, multichannel=True, gaussian=True)
+                # this_psnr = compare_psnr(estimated, gt)
+                # this_ssim = compare_ssim(estimated, gt, multichannel=True, gaussian=True)
+                #
+                # psnrs[validationIndex][tt] = this_psnr
+                # ssims[validationIndex][tt] = this_ssim
+                #
+                # psnr_whole += this_psnr
+                # ssim_whole += this_ssim
+                loss, _ = criterion(estimated, gt)
+                losses['total'].update(loss.item())
+                myutils.eval_metrics(estimated, gt, psnrs, ssims)
 
-                psnrs[validationIndex][tt] = this_psnr
-                ssims[validationIndex][tt] = this_ssim
-
-                psnr_whole += this_psnr
-                ssim_whole += this_ssim
+        # psnr_whole /= (len(testset) * config.inter_frames)
+        # ssim_whole /= (len(testset) * config.inter_frames)
 
 
-        psnr_whole /= (len(testset) * config.inter_frames)
-        ssim_whole /= (len(testset) * config.inter_frames)
-
-
-    return psnrs, ssims, psnr_whole, ssim_whole, folders
-
+    return losses['total'].avg, psnrs.avg, ssims.avg, folders
 
 
 if __name__ == "__main__":
@@ -273,20 +282,20 @@ if __name__ == "__main__":
         #torch.save()
 
 
-    psnrs, ssims, psnr, ssim, folder = validate(config)
-    for ii in range(config.inter_frames):
-        print('PSNR of validation frame' + str(ii+1) + ' is {}'.format(np.mean(psnrs[:, ii])))
-
-    for ii in range(config.inter_frames):
-        print('PSNR of validation frame' + str(ii+1) + ' is {}'.format(np.mean(ssims[:, ii])))
+    loss, psnr, ssim, folder = validate(config)
+    # for ii in range(config.inter_frames):
+    #     print('PSNR of validation frame' + str(ii+1) + ' is {}'.format(np.mean(psnrs[:, ii])))
+    #
+    # for ii in range(config.inter_frames):
+    #     print('PSNR of validation frame' + str(ii+1) + ' is {}'.format(np.mean(ssims[:, ii])))
 
     print('Whole PSNR is {}'.format(psnr) )
     print('Whole SSIM is {}'.format(ssim) )
 
-    with open(config.store_path + '/psnr.txt', 'w') as f:
-        for index in sorted(range(len(psnrs[:, 0])), key=lambda k: psnrs[k, 0]):
-            f.write("{}\t{}\n".format(folder[index], psnrs[index, 0]))
-
-    with open(config.store_path + '/ssim.txt', 'w') as f:
-        for index in sorted(range(len(ssims[:, 0])), key=lambda k: ssims[k, 0]):
-            f.write("{}\t{}\n".format(folder[index], ssims[index, 0]))
+    # with open(config.store_path + '/psnr.txt', 'w') as f:
+    #     for index in sorted(range(len(psnrs[:, 0])), key=lambda k: psnrs[k, 0]):
+    #         f.write("{}\t{}\n".format(folder[index], psnrs[index, 0]))
+    #
+    # with open(config.store_path + '/ssim.txt', 'w') as f:
+    #     for index in sorted(range(len(ssims[:, 0])), key=lambda k: ssims[k, 0]):
+    #         f.write("{}\t{}\n".format(folder[index], ssims[index, 0]))
