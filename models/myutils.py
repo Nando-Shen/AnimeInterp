@@ -1,7 +1,7 @@
 # from https://github.com/myungsub/CAIN/blob/master/utils.py, 
 # but removed the errenous normalization and quantization steps from computing the PSNR.
 
-from pytorch_msssim import ssim_matlab as calc_ssim
+from pytorch_msssim import ssim as calc_ssim
 import math
 import os
 import torch
