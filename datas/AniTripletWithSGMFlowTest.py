@@ -43,9 +43,18 @@ def _make_dataset(dir, dirf):
         #framesPath[index].append(os.path.join(clipsFolderPath, 'frame0.jpg'))
         # framesPath[index].append(os.path.join(clipsFolderPath, 'frame1.jpg'))
 
-        # # framesPath[index].append(os.path.join(clipsFolderPath, 'framet1.jpg'))
-        # # framesPath[index].append(os.path.join(clipsFolderPath, 'framet2.jpg'))
-        # # framesPath[index].append(os.path.join(clipsFolderPath, 'framet3.jpg'))
+        framesPath[index].append(os.path.join(clipsFolderPath, 'frame1.jpg'))
+        framesIndex[index].append('frame1.jpg')
+        framesFolder[index].append(folder)
+
+        framesPath[index].append(os.path.join(clipsFolderPath, 'frame2.jpg'))
+        framesIndex[index].append('frame2.jpg')
+        framesFolder[index].append(folder)
+
+        framesPath[index].append(os.path.join(clipsFolderPath, 'frame3.jpg'))
+        framesIndex[index].append('frame3.jpg')
+        framesFolder[index].append(folder)
+
         # # framesPath[index].append(os.path.join(clipsFolderPath, 'framet4.jpg'))
         # # framesPath[index].append(os.path.join(clipsFolderPath, 'framet5.jpg'))
         # # framesPath[index].append(os.path.join(clipsFolderPath, 'framet6.jpg'))
