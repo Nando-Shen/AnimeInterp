@@ -260,7 +260,7 @@ if __name__ == "__main__":
 
     for epoch in range(0, config.max_epoch):
 
-        # train(config)
+        train(config)
         psnr, ssim = validate(config)
         #torch.save()
         # print('PSNR is {}'.format(psnr))
