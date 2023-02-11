@@ -148,6 +148,7 @@ def train(config):
             this_ssim = ssim(estimated, gt, multichannel=True, gaussian=True)
             # myutils.eval_metrics(estimated, gt, psnrs, ssims)
             gt = torch.tensor(gt)
+            estimated = torch.tensor(estimated)
             loss, _ = criterion(estimated, gt)
             losses['total'].update(loss.item())
             loss.backward()
