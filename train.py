@@ -151,6 +151,8 @@ def train(config):
             gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
 
             # whole image value
+            this_psnr = psnr(estimated, gt)
+            this_ssim = ssim(estimated, gt, multichannel=True, gaussian=True)
 
             # myutils.eval_metrics(estimated, gt, psnrs, ssims)
 
@@ -158,10 +160,6 @@ def train(config):
             losses['total'].update(loss.item())
             loss.backward()
             optimizer.step()
-            gt = torch.tensor(gt)
-            estimated = torch.tensor(estimated)
-            this_psnr = psnr(estimated, gt)
-            this_ssim = ssim(estimated, gt, multichannel=True, gaussian=True)
 
             psnrs[validationIndex][tt] = this_psnr
             ssims[validationIndex][tt] = this_ssim
