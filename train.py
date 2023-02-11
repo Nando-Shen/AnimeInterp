@@ -147,7 +147,7 @@ def train(config):
             # to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(
             #     store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
 
-            estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
+            estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
             gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
 
             # whole image value
@@ -161,8 +161,8 @@ def train(config):
             loss.backward()
             optimizer.step()
 
-            psnrs[validationIndex][tt] = this_psnr
-            ssims[validationIndex][tt] = this_ssim
+            # psnrs[validationIndex][tt] = this_psnr
+            # ssims[validationIndex][tt] = this_ssim
 
             psnr_whole += this_psnr
             ssim_whole += this_ssim
@@ -247,9 +247,7 @@ def validate(config):
                 #
                 psnr_whole += this_psnr
                 ssim_whole += this_ssim
-                loss, _ = criterion(estimated, gt)
                 # losses['total'].update(loss.item())
-                myutils.eval_metrics(estimated, gt, psnrs, ssims)
 
         psnr_whole /= (len(testset) * config.inter_frames)
         ssim_whole /= (len(testset) * config.inter_frames)
