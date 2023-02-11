@@ -21,6 +21,9 @@ from utils.vis_flow import flow_to_color
 import json
 from loss import Loss
 from torch.optim import Adamax
+from skimage.metrics import peak_signal_noise_ratio as psnr
+from skimage.metrics import structural_similarity as ssim
+
 
 # loading configures
 parser = argparse.ArgumentParser()
@@ -85,10 +88,10 @@ def save_flow_to_img(flow, des):
 def train(config):
 
     ## values for whole image
-    # psnr_whole = 0
-    # psnrs = np.zeros([len(testset), config.inter_frames])
-    # ssim_whole = 0
-    # ssims = np.zeros([len(testset), config.inter_frames])
+    psnr_whole = 0
+    psnrs = np.zeros([len(testset), config.inter_frames])
+    ssim_whole = 0
+    ssims = np.zeros([len(testset), config.inter_frames])
     losses, psnrs, ssims = myutils.init_meters(config.loss)
     folders = []
 
@@ -107,7 +110,6 @@ def train(config):
         frame1 = sample[0]
         frame3 = None
         frame2 = sample[-1]
-        gt = sample[1].numpy()
 
         # folders.append(folder[0][0])
 
@@ -139,28 +141,28 @@ def train(config):
             #     store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
 
             estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
-            # gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
+            gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
 
             # whole image value
-            # this_psnr = compare_psnr(estimated, gt)
-            # this_ssim = compare_ssim(estimated, gt, multichannel=True, gaussian=True)
-            myutils.eval_metrics(estimated, gt, psnrs, ssims)
+            this_psnr = psnr(estimated, gt)
+            this_ssim = ssim(estimated, gt, multichannel=True, gaussian=True)
+            # myutils.eval_metrics(estimated, gt, psnrs, ssims)
 
             loss, _ = criterion(estimated, gt)
             losses['total'].update(loss.item())
             loss.backward()
             optimizer.step()
 
-            # psnrs[validationIndex][tt] = this_psnr
-            # ssims[validationIndex][tt] = this_ssim
-            #
-            # psnr_whole += this_psnr
-            # ssim_whole += this_ssim
+            psnrs[validationIndex][tt] = this_psnr
+            ssims[validationIndex][tt] = this_ssim
 
-    # psnr_whole /= (len(testset) * config.inter_frames)
-    # ssim_whole /= (len(testset) * config.inter_frames)
-    print('Train Epoch: {}\tLoss: {:.6f} \tPSNR: {:.4f} \tSSIM: {:.4f}\t Lr:{:.6f}'.format(
-        epoch,losses['total'].avg, psnrs.avg, ssims.avg,optimizer.param_groups[0]['lr'], flush=True))
+            psnr_whole += this_psnr
+            ssim_whole += this_ssim
+
+    psnr_whole /= (len(testset) * config.inter_frames)
+    ssim_whole /= (len(testset) * config.inter_frames)
+    print('Train Epoch: {}\tPSNR: {:.4f} \tSSIM: {:.4f}\t Lr:{:.6f}'.format(
+        epoch, psnr_whole, ssim_whole, optimizer.param_groups[0]['lr'], flush=True))
 
     return None
 
