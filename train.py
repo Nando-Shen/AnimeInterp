@@ -46,7 +46,7 @@ if not os.path.exists(config.store_path):
 
 testset = datas.AniTripletWithSGMFlowTest(config.testset_root, config.test_flow_root, trans, config.test_size,
                                           config.test_crop_size, train=False)
-trainset = datas.AniTripletWithSGMFlowTest(config.trainset_root, config.train_flow_root, trans, config.train_size,
+trainset = datas.AniTripletWithSGMFlow(config.trainset_root, config.train_flow_root, trans, config.train_size,
                                           config.test_crop_size, train=False)
 sampler = torch.utils.data.SequentialSampler(testset)
 trainsampler = torch.utils.data.SequentialSampler(trainset)
