@@ -1,7 +1,10 @@
 
-testset_root = 'datasets/test_2k_540p'
-test_flow_root = 'datasets/test_2k_pre_calc_sgm_flows'
+testset_root = '/home/jiaming/atd12k_points/test_2k_540p'
+test_flow_root = '/home/jiaming/sgm/test_2k_540p'
 test_annotation_root = 'datasets/test_2k_annotations'
+
+trainset_root = '/home/jiaming/atd12k_points/train_10k'
+train_flow_root = '/home/jiaming/sgm/train_10k'
 
 test_size = (960, 540)
 test_crop_size = (960, 540)
