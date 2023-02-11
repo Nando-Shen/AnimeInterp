@@ -63,8 +63,8 @@ sys.stdout.flush()
 model = getattr(models, config.model)(config.pwc_path).cuda()
 
 # load weights
-dict1 = torch.load(config.checkpoint)
-model.load_state_dict(dict1['model_state_dict'], strict=False)
+# dict1 = torch.load(config.checkpoint)
+# model.load_state_dict(dict1['model_state_dict'], strict=False)
 
 # prepare others
 store_path = config.store_path
