@@ -100,10 +100,13 @@ def train(config):
         sys.stdout.flush()
         sample, flow = validationData
 
+        print(sample.shape())
+
         frame0 = None
         frame1 = sample[0]
         frame3 = None
         frame2 = sample[-1]
+        gt = sample[1]
 
         # folders.append(folder[0][0])
 
