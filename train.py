@@ -113,8 +113,6 @@ def train(config):
         sys.stdout.flush()
         sample, flow = validationData
 
-        print(len(sample))
-
         frame0 = None
         frame1 = sample[0]
         frame3 = None
@@ -150,18 +148,20 @@ def train(config):
             #     store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
 
             estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
-            gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
+            gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
 
             # whole image value
-            this_psnr = psnr(estimated, gt)
-            this_ssim = ssim(estimated, gt, multichannel=True, gaussian=True)
+
             # myutils.eval_metrics(estimated, gt, psnrs, ssims)
-            gt = torch.tensor(gt)
-            estimated = torch.tensor(estimated)
+
             loss, _ = criterion(estimated, gt)
             losses['total'].update(loss.item())
             loss.backward()
             optimizer.step()
+            gt = torch.tensor(gt)
+            estimated = torch.tensor(estimated)
+            this_psnr = psnr(estimated, gt)
+            this_ssim = ssim(estimated, gt, multichannel=True, gaussian=True)
 
             psnrs[validationIndex][tt] = this_psnr
             ssims[validationIndex][tt] = this_ssim
