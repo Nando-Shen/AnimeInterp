@@ -76,7 +76,7 @@ model = torch.nn.DataParallel(model).to(device)
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
 store_path = config.store_path
-torch.cuda.manual_seed(args.random_seed)
+torch.cuda.manual_seed(config.random_seed)
 
 # loss function
 criterion = Loss(config)

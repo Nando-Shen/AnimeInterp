@@ -26,6 +26,7 @@ lr = 2e-4
 max_epoch = 20
 
 cuda = True
+random_seed = 103
 
 store_path = 'outputs/avi_full_results'
 
