@@ -120,8 +120,8 @@ def train(config):
         if not os.path.exists(config.store_path + '/' + folder[0][0]):
             os.mkdir(config.store_path + '/' + folder[0][0])
 
-        revtrans(I1.cpu()[0]).save(store_path + '/' + folder[0][0] + '/' + index[0][0] + '.jpg')
-        revtrans(I2.cpu()[0]).save(store_path + '/' + folder[-1][0] + '/' + index[-1][0] + '.jpg')
+        # revtrans(I1.cpu()[0]).save(store_path + '/' + folder[0][0] + '/' + index[0][0] + '.jpg')
+        # revtrans(I2.cpu()[0]).save(store_path + '/' + folder[-1][0] + '/' + index[-1][0] + '.jpg')
 
         for tt in range(config.inter_frames):
             x = config.inter_frames
@@ -134,8 +134,8 @@ def train(config):
             # to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(
             #     store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
 
-            estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
-            gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
+            estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).transpose(1, 2, 0)
+            gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).transpose(1, 2, 0)
             print(gt.size())
             # whole image value
             # this_psnr = compare_psnr(estimated, gt)
