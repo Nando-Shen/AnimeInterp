@@ -154,7 +154,7 @@ def train(config):
 
             # myutils.eval_metrics(estimated, gt, psnrs, ssims)
 
-            loss, _ = criterion(It_warp[0], ITs[tt][0])
+            loss, _ = criterion(It_warp.cpu(), ITs[tt])
             losses['total'].update(loss.item())
             loss.backward()
             optimizer.step()
