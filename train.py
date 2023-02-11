@@ -136,7 +136,7 @@ def train(config):
 
             estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
             gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
-            print(gt.size())
+            print(gt)
             # whole image value
             # this_psnr = compare_psnr(estimated, gt)
             # this_ssim = compare_ssim(estimated, gt, multichannel=True, gaussian=True)
