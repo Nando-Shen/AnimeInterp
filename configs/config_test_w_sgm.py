@@ -25,6 +25,8 @@ loss = '1*L1'
 lr = 2e-4
 max_epoch = 20
 
+cuda = True
+
 store_path = 'outputs/avi_full_results'
 
 
