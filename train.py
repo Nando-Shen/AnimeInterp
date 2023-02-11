@@ -24,12 +24,13 @@ from torch.optim import Adamax
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 
-
 # loading configures
 parser = argparse.ArgumentParser()
 parser.add_argument('config')
 args = parser.parse_args()
 config = Config.from_file(args.config)
+device = torch.device('cuda' if config.cuda else 'cpu')
+
 
 # preparing datasets & normalization
 normalize1 = TF.Normalize(config.mean, [1.0, 1.0, 1.0])
@@ -64,14 +65,18 @@ print(trainset)
 sys.stdout.flush()
 
 # prepare model
-model = getattr(models, config.model)(config.pwc_path).cuda()
+model = getattr(models, config.model)(config.pwc_path)
+model = torch.nn.DataParallel(model).to(device)
 
 # load weights
 # dict1 = torch.load(config.checkpoint)
 # model.load_state_dict(dict1['model_state_dict'], strict=False)
 
 # prepare others
+torch.backends.cudnn.enabled = True
+torch.backends.cudnn.benchmark = True
 store_path = config.store_path
+torch.cuda.manual_seed(args.random_seed)
 
 # loss function
 criterion = Loss(config)
@@ -99,6 +104,10 @@ def train(config):
     sys.stdout.flush()
 
     model.train()
+    criterion.train()
+    optimizer.zero_grad()
+    torch.cuda.empty_cache()
+
     for validationIndex, validationData in enumerate(trainloader, 0):
         print('Training {}/{}-th group...'.format(validationIndex, len(testset)))
         sys.stdout.flush()
