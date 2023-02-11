@@ -100,7 +100,7 @@ def train(config):
         sys.stdout.flush()
         sample, flow = validationData
 
-        print(sample.shape())
+        print(len(sample))
 
         frame0 = None
         frame1 = sample[0]
