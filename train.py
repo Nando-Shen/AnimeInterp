@@ -97,7 +97,7 @@ def train(config):
     psnrs = np.zeros([len(testset), config.inter_frames])
     ssim_whole = 0
     ssims = np.zeros([len(testset), config.inter_frames])
-    losses, psnrs, ssims = myutils.init_meters(config.loss)
+    # losses, psnrs, ssims = myutils.init_meters(config.loss)
     folders = []
 
     print('Everything prepared. Ready to train...')
@@ -157,7 +157,7 @@ def train(config):
             # myutils.eval_metrics(estimated, gt, psnrs, ssims)
 
             loss, _ = criterion(It_warp.cpu(), ITs[tt])
-            losses['total'].update(loss.item())
+            # losses['total'].update(loss.item())
             loss.backward()
             optimizer.step()
 
