@@ -98,7 +98,7 @@ def train(config):
     for validationIndex, validationData in enumerate(trainloader, 0):
         print('Training {}/{}-th group...'.format(validationIndex, len(testset)))
         sys.stdout.flush()
-        sample, flow, index, folder = validationData
+        sample, flow = validationData
 
         frame0 = None
         frame1 = sample[0]
