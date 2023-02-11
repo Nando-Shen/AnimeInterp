@@ -105,7 +105,7 @@ def train(config):
         frame3 = None
         frame2 = sample[-1]
 
-        folders.append(folder[0][0])
+        # folders.append(folder[0][0])
 
         # initial SGM flow
         F12i, F21i = flow
@@ -117,8 +117,8 @@ def train(config):
         I1 = frame1.cuda()
         I2 = frame2.cuda()
 
-        if not os.path.exists(config.store_path + '/' + folder[0][0]):
-            os.mkdir(config.store_path + '/' + folder[0][0])
+        # if not os.path.exists(config.store_path + '/' + folder[0][0]):
+        #     os.mkdir(config.store_path + '/' + folder[0][0])
 
         # revtrans(I1.cpu()[0]).save(store_path + '/' + folder[0][0] + '/' + index[0][0] + '.jpg')
         # revtrans(I2.cpu()[0]).save(store_path + '/' + folder[-1][0] + '/' + index[-1][0] + '.jpg')
