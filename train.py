@@ -70,8 +70,8 @@ model = getattr(models, config.model)(config.pwc_path).cuda()
 store_path = config.store_path
 
 # loss function
-criterion = Loss(args)
-optimizer = Adamax(model.parameters(), lr=args.lr, betas=(0.9, 0.999))
+criterion = Loss(config)
+optimizer = Adamax(model.parameters(), lr=config.lr, betas=(0.9, 0.999))
 
 def save_flow_to_img(flow, des):
         f = flow[0].data.cpu().numpy().transpose([1, 2, 0])
@@ -88,7 +88,7 @@ def train(config):
     # psnrs = np.zeros([len(testset), config.inter_frames])
     # ssim_whole = 0
     # ssims = np.zeros([len(testset), config.inter_frames])
-    losses, psnrs, ssims = myutils.init_meters(args.loss)
+    losses, psnrs, ssims = myutils.init_meters(config.loss)
     folders = []
 
     print('Everything prepared. Ready to train...')
@@ -198,7 +198,7 @@ def validate(config):
     # psnrs = np.zeros([len(testset), config.inter_frames])
     # ssim_whole = 0
     # ssims = np.zeros([len(testset), config.inter_frames])
-    losses, psnrs, ssims = myutils.init_meters(args.loss)
+    losses, psnrs, ssims = myutils.init_meters(config.loss)
 
     folders = []
 
@@ -276,7 +276,7 @@ def validate(config):
 
 if __name__ == "__main__":
 
-    for epoch in range(0, args.max_epoch):
+    for epoch in range(0, config.max_epoch):
         train(config)
 
         #torch.save()

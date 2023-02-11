@@ -22,6 +22,8 @@ pwc_path = None
 checkpoint = 'checkpoints/anime_interp_full.ckpt'
 
 loss = '1*L1'
+lr = 2e-4
+max_epoch = 20
 
 store_path = 'outputs/avi_full_results'
 
