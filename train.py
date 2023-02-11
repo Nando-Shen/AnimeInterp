@@ -198,7 +198,8 @@ def validate(config):
     with torch.no_grad():
         ii = 0
         for validationIndex, validationData in enumerate(validationloader, 0):
-            print('Testing {}/{}-th group...'.format(validationIndex, len(testset)))
+            if (validationIndex % 200 == 0):
+                print('Testing {}/{}-th group...'.format(validationIndex, len(testset)))
             sys.stdout.flush()
             sample, flow,  index, folder = validationData
 
