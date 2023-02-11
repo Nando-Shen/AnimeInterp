@@ -26,12 +26,12 @@ def _make_dataset(dir, dirf):
         # Find and loop over all the frames inside the clip.
         # for image in sorted(os.listdir(clipsFolderPath)):
         #     # Add path to list.
-
-        
-
+        ii = 0
         for image in sorted(os.listdir(clipsFolderPath)):
             # Add path to list.
             framesPath[index].append(os.path.join(clipsFolderPath, image))
+            ii+=1
+        print("aaaaaa{}".format(ii))
         #framesPath[index].append(os.path.join(clipsFolderPath, 'frame0.jpg'))
         # framesPath[index].append(os.path.join(clipsFolderPath, 'frame1.jpg'))
 
@@ -50,7 +50,7 @@ def _make_dataset(dir, dirf):
         # guide_flo31.npy
         flowPath[index].append(os.path.join(flowFolderPath, 'guide_flo31.npy'))
     # print(framesPath)
-    print("aaaaaa{}".format(len(framesPath)))
+
     return framesPath, flowPath
 
 
