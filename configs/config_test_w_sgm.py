@@ -6,8 +6,10 @@ test_annotation_root = 'datasets/test_2k_annotations'
 trainset_root = '/home/jiaming/atd12k_points/train_10k'
 train_flow_root = '/home/jiaming/sgm/train_10k'
 
-test_size = (960, 540)
-test_crop_size = (960, 540)
+test_size = (512, 288)
+test_crop_size = (512, 512)
+train_size = (512, 512)
+train_crop_size = (512, 512)
 
 mean = [0., 0., 0.]
 std  = [1, 1, 1]
