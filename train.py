@@ -107,7 +107,7 @@ def train(config):
         frame1 = sample[0]
         frame3 = None
         frame2 = sample[-1]
-        gt = sample[1]
+        gt = sample[1].numpy()
 
         # folders.append(folder[0][0])
 
