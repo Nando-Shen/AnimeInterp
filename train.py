@@ -115,7 +115,8 @@ def train(config):
         if (validationIndex % 200 == 0):
             print('Training {}/{}-th group...'.format(validationIndex, len(testset)))
 
-        sample, flow = validationData
+        # sample, flow = validationData
+        sample = validationData
 
         frame0 = None
         frame1 = sample[0]
@@ -125,10 +126,10 @@ def train(config):
         # folders.append(folder[0][0])
 
         # initial SGM flow
-        F12i, F21i = flow
+        # F12i, F21i = flow
 
-        F12i = F12i.float().cuda()
-        F21i = F21i.float().cuda()
+        # F12i = F12i.float().cuda()
+        # F21i = F21i.float().cuda()
 
         ITs = sample[1]
         I1 = frame1.cuda()
@@ -142,7 +143,7 @@ def train(config):
 
         t = 1.0 / 2.0
         optimizer.zero_grad()
-        outputs = model(I1, I2, F12i, F21i, t)
+        outputs = model(I1, I2, None, None, t)
 
         It_warp = outputs[0]
 
