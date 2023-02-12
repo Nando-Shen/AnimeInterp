@@ -23,7 +23,7 @@ from loss import Loss
 from torch.optim import Adamax
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
-from torch.cuda.amp import autocast, GradScaler
+# from torch.cuda.amp import autocast, GradScaler
 
 
 # loading configures
@@ -69,7 +69,7 @@ sys.stdout.flush()
 # prepare model
 model = getattr(models, config.model)(config.pwc_path)
 model = torch.nn.DataParallel(model).to(device)
-scaler = GradScaler()
+# scaler = GradScaler()
 
 
 # load weights
@@ -141,11 +141,9 @@ def train(config):
 
         t = 1.0 / 2.0
         optimizer.zero_grad()
-        with autocast():
-            outputs = model(I1, I2, F12i, F21i, t)
-            It_warp = outputs[0]
-            loss, _ = criterion(It_warp.cpu(), ITs)
+        outputs = model(I1, I2, F12i, F21i, t)
 
+        It_warp = outputs[0]
 
         # to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(
         #     store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
@@ -157,21 +155,22 @@ def train(config):
         # this_psnr = psnr(est, gt)
         # this_ssim = ssim(est, gt, multichannel=True, gaussian=True)
 
-        # losses['total'].update(loss.item())
-        scaler.scale(loss).backward()
-        scaler.step(optimizer)
-        scaler.update()
+        myutils.eval_metrics(It_warp.cpu(), ITs, psnrs, ssims)
 
-        # loss.backward()
-        # optimizer.step()
+        loss, _ = criterion(It_warp.cpu(), ITs)
+        # losses['total'].update(loss.item())
+        # scaler.scale(loss).backward()
+        # scaler.step(optimizer)
+        # scaler.update()
+
+        loss.backward()
+        optimizer.step()
 
         # psnrs[validationIndex][tt] = this_psnr
         # ssims[validationIndex][tt] = this_ssim
 
         # psnr_whole += this_psnr
         # ssim_whole += this_ssim
-        with autocast():
-            myutils.eval_metrics(It_warp.cpu(), ITs, psnrs, ssims)
         losses, psnrs, ssims = myutils.init_meters(args.loss)
 
     # psnr_whole /= (len(testset) * config.inter_frames)
