@@ -20,7 +20,7 @@ def eval_metrics(output, gt, psnrs, ssims):
         psnr = calc_psnr(output[b], gt[b])
         psnrs.update(psnr)
 
-        ssim = calc_ssim(output[b].unsqueeze(0).clamp(0,1), gt[b].unsqueeze(0).clamp(0,1) , val_range=1.)
+        ssim = calc_ssim(output[b].unsqueeze(0).clamp(0,1), gt[b].unsqueeze(0).clamp(0,1) , data_range=1.)
         ssims.update(ssim)
 
 def init_losses(loss_str):
