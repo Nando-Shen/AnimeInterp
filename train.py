@@ -93,11 +93,11 @@ def save_flow_to_img(flow, des):
 def train(config):
 
     ## values for whole image
-    # psnr_whole = 0
+    psnr_whole = 0
     # psnrs = np.zeros([len(testset), config.inter_frames])
-    # ssim_whole = 0
+    ssim_whole = 0
     # ssims = np.zeros([len(testset), config.inter_frames])
-    losses, psnrs, ssims = myutils.init_meters(config.loss)
+    # losses, psnrs, ssims = myutils.init_meters(config.loss)
     # folders = []
 
     print('Everything prepared. Ready to train...')
@@ -105,11 +105,10 @@ def train(config):
 
     model.train()
     criterion.train()
-    optimizer.zero_grad()
     torch.cuda.empty_cache()
 
     for validationIndex, validationData in enumerate(trainloader, 0):
-        if (validationIndex % 200 == 0):
+        if (validationIndex % 10 == 0):
             print('Training {}/{}-th group...'.format(validationIndex, len(testset)))
         sample, flow = validationData
 
@@ -139,7 +138,7 @@ def train(config):
         for tt in range(config.inter_frames):
             x = config.inter_frames
             t = 1.0 / (x + 1) * (tt + 1)
-
+            optimizer.zero_grad()
             outputs = model(I1, I2, F12i, F21i, t)
 
             It_warp = outputs[0]
@@ -151,10 +150,10 @@ def train(config):
             # gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
 
             # whole image value
-            # this_psnr = psnr(estimated, gt)
-            # this_ssim = ssim(estimated, gt, multichannel=True, gaussian=True)
+            this_psnr = psnr(It_warp.cpu(), ITs[tt])
+            this_ssim = ssim(It_warp.cpu(), ITs[tt], multichannel=True, gaussian=True)
 
-            myutils.eval_metrics(It_warp.cpu(), ITs[tt], psnrs, ssims)
+            # myutils.eval_metrics(It_warp.cpu(), ITs[tt], psnrs, ssims)
 
             loss, _ = criterion(It_warp.cpu(), ITs[tt])
             # losses['total'].update(loss.item())
@@ -164,13 +163,13 @@ def train(config):
             # psnrs[validationIndex][tt] = this_psnr
             # ssims[validationIndex][tt] = this_ssim
 
-            # psnr_whole += this_psnr
-            # ssim_whole += this_ssim
+            psnr_whole += this_psnr
+            ssim_whole += this_ssim
 
     # psnr_whole /= (len(testset) * config.inter_frames)
     # ssim_whole /= (len(testset) * config.inter_frames)
     print('Train Epoch: {}\tPSNR: {:.4f} \tSSIM: {:.4f}\t Lr:{:.6f}'.format(
-        epoch, psnrs.avg, ssim.avg, optimizer.param_groups[0]['lr'], flush=True))
+        epoch, psnr_whole, ssim_whole, optimizer.param_groups[0]['lr'], flush=True))
 
     return None
 
