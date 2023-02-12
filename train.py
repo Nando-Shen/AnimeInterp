@@ -171,7 +171,7 @@ def train(config):
 
         # psnr_whole += this_psnr
         # ssim_whole += this_ssim
-        losses, psnrs, ssims = myutils.init_meters(args.loss)
+        losses, psnrs, ssims = myutils.init_meters(config.loss)
 
     # psnr_whole /= (len(testset) * config.inter_frames)
     # ssim_whole /= (len(testset) * config.inter_frames)
