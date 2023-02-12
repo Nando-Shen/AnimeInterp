@@ -154,7 +154,7 @@ def train(config):
             # this_psnr = psnr(estimated, gt)
             # this_ssim = ssim(estimated, gt, multichannel=True, gaussian=True)
 
-            myutils.eval_metrics(It_warp.cpu(), ITs[tt], psnrs, ssims)
+            myutils.eval_metrics(It_warp[0].cpu(), ITs[tt][0], psnrs, ssims)
 
             loss, _ = criterion(It_warp.cpu(), ITs[tt])
             # losses['total'].update(loss.item())
