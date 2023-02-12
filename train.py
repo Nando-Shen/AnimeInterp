@@ -112,8 +112,11 @@ def train(config):
     torch.cuda.empty_cache()
 
     for validationIndex, validationData in enumerate(trainloader, 0):
-        if (validationIndex % 10 == 0):
+        if (validationIndex % 200 == 0):
             print('Training {}/{}-th group...'.format(validationIndex, len(testset)))
+            print('Train Epoch: {}\tPSNR: {:.4f} \tSSIM: {:.4f}\t Lr:{:.6f}'.format(
+                epoch, psnrs.avg, ssims.avg, optimizer.param_groups[0]['lr'], flush=True))
+
         sample, flow = validationData
 
         frame0 = None
@@ -175,8 +178,6 @@ def train(config):
 
     # psnr_whole /= (len(testset) * config.inter_frames)
     # ssim_whole /= (len(testset) * config.inter_frames)
-    print('Train Epoch: {}\tPSNR: {:.4f} \tSSIM: {:.4f}\t Lr:{:.6f}'.format(
-        epoch, psnrs.avg, ssims.avg, optimizer.param_groups[0]['lr'], flush=True))
 
     return None
 
@@ -260,7 +261,7 @@ def validate(config):
         # psnr_whole /= (len(testset) * config.inter_frames)
         # ssim_whole /= (len(testset) * config.inter_frames)
 
-    return psnr.avg, ssim.avg
+    return psnrs.avg, ssims.avg
 
 
 if __name__ == "__main__":
