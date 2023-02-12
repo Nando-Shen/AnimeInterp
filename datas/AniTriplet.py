@@ -11,7 +11,7 @@ import torch
 import cv2
 import torch.nn.functional as F
 
-def _make_dataset(dir, dirf):
+def _make_dataset(dir):
     framesPath = []
 
     # Find and loop over all the clips in root `dir`.
