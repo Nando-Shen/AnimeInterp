@@ -23,6 +23,8 @@ from loss import Loss
 from torch.optim import Adamax
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
+from torch.cuda.amp import autocast, GradScaler
+
 
 # loading configures
 parser = argparse.ArgumentParser()
@@ -67,6 +69,8 @@ sys.stdout.flush()
 # prepare model
 model = getattr(models, config.model)(config.pwc_path)
 model = torch.nn.DataParallel(model).to(device)
+scaler = GradScaler()
+
 
 # load weights
 # dict1 = torch.load(config.checkpoint)
@@ -97,7 +101,7 @@ def train(config):
     # psnrs = np.zeros([len(testset), config.inter_frames])
     ssim_whole = 0
     # ssims = np.zeros([len(testset), config.inter_frames])
-    # losses, psnrs, ssims = myutils.init_meters(config.loss)
+    losses, psnrs, ssims = myutils.init_meters(config.loss)
     # folders = []
 
     print('Everything prepared. Ready to train...')
@@ -125,7 +129,7 @@ def train(config):
         F12i = F12i.float().cuda()
         F21i = F21i.float().cuda()
 
-        ITs = [sample[tt] for tt in range(1, 2)]
+        ITs = sample[1]
         I1 = frame1.cuda()
         I2 = frame2.cuda()
 
@@ -135,43 +139,45 @@ def train(config):
         # revtrans(I1.cpu()[0]).save(store_path + '/' + folder[0][0] + '/' + index[0][0] + '.jpg')
         # revtrans(I2.cpu()[0]).save(store_path + '/' + folder[-1][0] + '/' + index[-1][0] + '.jpg')
 
-        for tt in range(config.inter_frames):
-            x = config.inter_frames
-            t = 1.0 / (x + 1) * (tt + 1)
-            optimizer.zero_grad()
+        t = 1.0 / 2.0
+        optimizer.zero_grad()
+        with autocast():
             outputs = model(I1, I2, F12i, F21i, t)
-
             It_warp = outputs[0]
+            loss, _ = criterion(It_warp.cpu(), ITs)
 
-            # to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(
-            #     store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
 
-            # estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
-            # gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
-            est = It_warp.cpu()
-            gt = ITs[tt].numpy()
-            print(est.size())
-            # whole image value
-            this_psnr = psnr(est, gt)
-            this_ssim = ssim(est, gt, multichannel=True, gaussian=True)
+        # to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(
+        #     store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
 
-            # myutils.eval_metrics(It_warp.cpu(), ITs[tt], psnrs, ssims)
+        # estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
+        # gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
 
-            loss, _ = criterion(It_warp.cpu(), ITs[tt])
-            # losses['total'].update(loss.item())
-            loss.backward()
-            optimizer.step()
+        # whole image value
+        # this_psnr = psnr(est, gt)
+        # this_ssim = ssim(est, gt, multichannel=True, gaussian=True)
 
-            # psnrs[validationIndex][tt] = this_psnr
-            # ssims[validationIndex][tt] = this_ssim
+        # losses['total'].update(loss.item())
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
 
-            psnr_whole += this_psnr
-            ssim_whole += this_ssim
+        # loss.backward()
+        # optimizer.step()
+
+        # psnrs[validationIndex][tt] = this_psnr
+        # ssims[validationIndex][tt] = this_ssim
+
+        # psnr_whole += this_psnr
+        # ssim_whole += this_ssim
+        with autocast():
+            myutils.eval_metrics(It_warp.cpu(), ITs, psnrs, ssims)
+        losses, psnrs, ssims = myutils.init_meters(args.loss)
 
     # psnr_whole /= (len(testset) * config.inter_frames)
     # ssim_whole /= (len(testset) * config.inter_frames)
     print('Train Epoch: {}\tPSNR: {:.4f} \tSSIM: {:.4f}\t Lr:{:.6f}'.format(
-        epoch, psnr_whole, ssim_whole, optimizer.param_groups[0]['lr'], flush=True))
+        epoch, psnrs.avg, ssims.avg, optimizer.param_groups[0]['lr'], flush=True))
 
     return None
 
