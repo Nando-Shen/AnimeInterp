@@ -148,10 +148,12 @@ def train(config):
 
             # estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
             # gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
+            est = It_warp.cpu().detach().numpy()
+            gt = ITs[tt].numpy()
 
             # whole image value
-            this_psnr = psnr(It_warp.cpu().detach().numpy(), ITs[tt])
-            this_ssim = ssim(It_warp.cpu().numpy(), ITs[tt], multichannel=True, gaussian=True)
+            this_psnr = psnr(est, gt)
+            this_ssim = ssim(est, gt, multichannel=True, gaussian=True)
 
             # myutils.eval_metrics(It_warp.cpu(), ITs[tt], psnrs, ssims)
 
