@@ -150,7 +150,7 @@ def train(config):
             # gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
             est = It_warp.cpu().detach().numpy().transpose(1, 2, 0)
             gt = ITs[tt].numpy().transpose(1, 2, 0)
-
+            print(est.size())
             # whole image value
             this_psnr = psnr(est, gt)
             this_ssim = ssim(est, gt, multichannel=True, gaussian=True)
