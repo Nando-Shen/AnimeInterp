@@ -211,7 +211,8 @@ def validate(config):
             if (validationIndex % 200 == 0):
                 print('Testing {}/{}-th group...'.format(validationIndex, len(testset)))
             sys.stdout.flush()
-            sample, flow,  index, folder = validationData
+            # sample, flow,  index, folder = validationData
+            sample = validationData
 
             frame0 = None
             frame1 = sample[0]
@@ -221,10 +222,10 @@ def validate(config):
             # folders.append(folder[0][0])
             
             # initial SGM flow
-            F12i, F21i  = flow
+            # F12i, F21i  = flow
 
-            F12i = F12i.float().cuda() 
-            F21i = F21i.float().cuda()
+            # F12i = F12i.float().cuda()
+            # F21i = F21i.float().cuda()
 
             ITs = sample[1]
             I1 = frame1.cuda()
@@ -240,7 +241,8 @@ def validate(config):
                 # x = config.inter_frames
             t = 1.0/2.0
 
-            outputs = model(I1, I2, F12i, F21i, t)
+            # outputs = model(I1, I2, F12i, F21i, t)
+            outputs = model(I1, I2, None, None, t)
 
             It_warp = outputs[0]
 
@@ -271,7 +273,7 @@ if __name__ == "__main__":
 
     for epoch in range(0, config.max_epoch):
 
-        train(config)
+        # train(config)
         psnr, ssim = validate(config)
         #torch.save()
         # print('PSNR is {}'.format(psnr))
