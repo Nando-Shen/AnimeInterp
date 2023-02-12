@@ -184,11 +184,11 @@ def train(config):
 def validate(config):
 
     ## values for whole image
-    psnr_whole = 0
-    psnrs = np.zeros([len(testset), config.inter_frames])
-    ssim_whole = 0
-    ssims = np.zeros([len(testset), config.inter_frames])
-    # losses, psnrs, ssims = myutils.init_meters(config.loss)
+    # psnr_whole = 0
+    # psnrs = np.zeros([len(testset), config.inter_frames])
+    # ssim_whole = 0
+    # ssims = np.zeros([len(testset), config.inter_frames])
+    losses, psnrs, ssims = myutils.init_meters(config.loss)
 
     # folders = []
 
@@ -222,7 +222,7 @@ def validate(config):
             F12i = F12i.float().cuda() 
             F21i = F21i.float().cuda()
 
-            ITs = [sample[tt] for tt in range(1, 2)]
+            ITs = sample[1]
             I1 = frame1.cuda()
             I2 = frame2.cuda()
 
@@ -232,34 +232,35 @@ def validate(config):
 
             # revtrans(I1.cpu()[0]).save(store_path + '/' + folder[0][0] + '/'  + index[0][0] + '.jpg')
             # revtrans(I2.cpu()[0]).save(store_path + '/' + folder[-1][0] + '/' +  index[-1][0] + '.jpg')
-            for tt in range(config.inter_frames):
-                x = config.inter_frames
-                t = 1.0/(x+1) * (tt + 1)
-                
-                outputs = model(I1, I2, F12i, F21i, t)
+            # for tt in range(config.inter_frames):
+                # x = config.inter_frames
+            t = 1.0/2.0
 
-                It_warp = outputs[0]
+            outputs = model(I1, I2, F12i, F21i, t)
 
-                # to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
+            It_warp = outputs[0]
 
-                estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
-                gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0) 
+            # to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
 
-                # whole image value
-                this_psnr = psnr(estimated, gt)
-                this_ssim = ssim(estimated, gt, multichannel=True, gaussian=True)
-                #
-                # psnrs[validationIndex][tt] = this_psnr
-                # ssims[validationIndex][tt] = this_ssim
-                #
-                psnr_whole += this_psnr
-                ssim_whole += this_ssim
-                # losses['total'].update(loss.item())
+            # estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
+            # gt = revNormalize(ITs[0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
 
-        psnr_whole /= (len(testset) * config.inter_frames)
-        ssim_whole /= (len(testset) * config.inter_frames)
+            # whole image value
+            # this_psnr = psnr(estimated, gt)
+            # this_ssim = ssim(estimated, gt, multichannel=True, gaussian=True)
+            #
+            # psnrs[validationIndex][tt] = this_psnr
+            # ssims[validationIndex][tt] = this_ssim
+            #
+            # psnr_whole += this_psnr
+            # ssim_whole += this_ssim
+            # losses['total'].update(loss.item())
+            myutils.eval_metrics(It_warp.cpu(), ITs, psnrs, ssims)
 
-    return psnr_whole, ssim_whole
+        # psnr_whole /= (len(testset) * config.inter_frames)
+        # ssim_whole /= (len(testset) * config.inter_frames)
+
+    return psnr.avg, ssim.avg
 
 
 if __name__ == "__main__":
