@@ -50,9 +50,9 @@ revtrans = TF.Compose([revnormalize1, revnormalize2, TF.ToPILImage()])
 if not os.path.exists(config.store_path):
     os.mkdir(config.store_path)
 
-testset = datas.AniTriplet(config.testset_root, config.test_flow_root, trans, config.test_size,
+testset = datas.AniTriplet(config.testset_root, trans, config.test_size,
                                           config.test_crop_size, train=False)
-trainset = datas.AniTriplet(config.trainset_root, config.train_flow_root, trans, config.train_size,
+trainset = datas.AniTriplet(config.trainset_root, trans, config.train_size,
                                           config.test_crop_size, train=False)
 sampler = torch.utils.data.SequentialSampler(testset)
 trainsampler = torch.utils.data.SequentialSampler(trainset)
