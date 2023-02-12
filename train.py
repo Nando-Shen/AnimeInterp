@@ -50,9 +50,9 @@ revtrans = TF.Compose([revnormalize1, revnormalize2, TF.ToPILImage()])
 if not os.path.exists(config.store_path):
     os.mkdir(config.store_path)
 
-testset = datas.AniTripletWithSGMFlowTest(config.testset_root, config.test_flow_root, trans, config.test_size,
+testset = datas.AniTriplet(config.testset_root, config.test_flow_root, trans, config.test_size,
                                           config.test_crop_size, train=False)
-trainset = datas.AniTripletWithSGMFlow(config.trainset_root, config.train_flow_root, trans, config.train_size,
+trainset = datas.AniTriplet(config.trainset_root, config.train_flow_root, trans, config.train_size,
                                           config.test_crop_size, train=False)
 sampler = torch.utils.data.SequentialSampler(testset)
 trainsampler = torch.utils.data.SequentialSampler(trainset)
@@ -114,8 +114,6 @@ def train(config):
     for validationIndex, validationData in enumerate(trainloader, 0):
         if (validationIndex % 200 == 0):
             print('Training {}/{}-th group...'.format(validationIndex, len(testset)))
-            print('Train Epoch: {}\tPSNR: {:.4f} \tSSIM: {:.4f}\t Lr:{:.6f}'.format(
-                epoch, psnrs.avg, ssims.avg, optimizer.param_groups[0]['lr'], flush=True))
 
         sample, flow = validationData
 
@@ -174,6 +172,10 @@ def train(config):
 
         # psnr_whole += this_psnr
         # ssim_whole += this_ssim
+        if (validationIndex % 200 == 0):
+            print('Train Epoch: {}\tPSNR: {:.4f} \tSSIM: {:.4f}\t Lr:{:.6f}'.format(
+                epoch, psnrs.avg, ssims.avg, optimizer.param_groups[0]['lr'], flush=True))
+
         losses, psnrs, ssims = myutils.init_meters(config.loss)
 
     # psnr_whole /= (len(testset) * config.inter_frames)

@@ -23,9 +23,12 @@ def _make_dataset(dir, dirf):
             continue
         framesPath.append([])
 
-        for image in sorted(os.listdir(clipsFolderPath)):
-            # Add path to list.
-            framesPath[index].append(os.path.join(clipsFolderPath, image))
+        # for image in sorted(os.listdir(clipsFolderPath)):
+        #     # Add path to list.
+        #     framesPath[index].append(os.path.join(clipsFolderPath, image))
+        framesPath[index].append(os.path.join(clipsFolderPath, 'frame1.jpg'))
+        framesPath[index].append(os.path.join(clipsFolderPath, 'frame2.jpg'))
+        framesPath[index].append(os.path.join(clipsFolderPath, 'frame3.jpg'))
 
     return framesPath
 
