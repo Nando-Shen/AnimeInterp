@@ -150,8 +150,8 @@ def train(config):
             # gt = revNormalize(ITs[tt][0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
 
             # whole image value
-            this_psnr = psnr(It_warp.cpu(), ITs[tt])
-            this_ssim = ssim(It_warp.cpu(), ITs[tt], multichannel=True, gaussian=True)
+            this_psnr = psnr(It_warp.cpu().detach().numpy(), ITs[tt])
+            this_ssim = ssim(It_warp.cpu().numpy(), ITs[tt], multichannel=True, gaussian=True)
 
             # myutils.eval_metrics(It_warp.cpu(), ITs[tt], psnrs, ssims)
 
