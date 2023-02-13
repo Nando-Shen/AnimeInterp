@@ -245,11 +245,10 @@ def validate(config):
             outputs = model(I1, I2, None, None, t)
 
             It_warp = outputs[0]
-            print(It_warp.cpu()[0].size())
 
             # to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
             if (ii % 20 == 0):
-                to_img(It_warp.cpu()[0]).save(store_path + '/' + str(ii) + '.jpg')
+                to_img(It_warp.cpu()[0]).clamp(0.0, 1.0).save(store_path + '/' + str(ii) + '.jpg')
                 to_img(ITs[0]).save(store_path + '/' + str(ii) + '-.jpg')
             ii += 1
 
