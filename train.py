@@ -251,8 +251,8 @@ def validate(config):
             #     to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(store_path + '/' + str(ii) + '.jpg')
             #     to_img(ITs[0]).save(store_path + '/' + str(ii) + '-.jpg')
             # ii += 1
-            estimated = revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)
-            gt = ITs[0]
+            estimated = revNormalize(It_warp.cpu()[0]).unsqueeze(0)
+            gt = ITs
             # estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
             # gt = revNormalize(ITs[0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
 
