@@ -247,11 +247,12 @@ def validate(config):
             It_warp = outputs[0]
 
             # to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
-            if (ii % 40 == 0):
-                to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(store_path + '/' + str(ii) + '.jpg')
-                to_img(ITs[0]).save(store_path + '/' + str(ii) + '-.jpg')
-            ii += 1
-
+            # if (ii % 40 == 0):
+            #     to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(store_path + '/' + str(ii) + '.jpg')
+            #     to_img(ITs[0]).save(store_path + '/' + str(ii) + '-.jpg')
+            # ii += 1
+            estimated = revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)
+            gt = ITs[0]
             # estimated = revNormalize(It_warp[0].cpu()).clamp(0.0, 1.0).detach().numpy().transpose(1, 2, 0)
             # gt = revNormalize(ITs[0]).clamp(0.0, 1.0).numpy().transpose(1, 2, 0)
 
@@ -265,7 +266,7 @@ def validate(config):
             # psnr_whole += this_psnr
             # ssim_whole += this_ssim
             # losses['total'].update(loss.item())
-            myutils.eval_metrics(It_warp.cpu(), ITs, psnrs, ssims)
+            myutils.eval_metrics(estimated, gt, psnrs, ssims)
 
         # psnr_whole /= (len(testset) * config.inter_frames)
         # ssim_whole /= (len(testset) * config.inter_frames)
@@ -277,7 +278,7 @@ if __name__ == "__main__":
 
     for epoch in range(0, config.max_epoch):
 
-        train(config)
+        # train(config)
         psnr, ssim = validate(config)
         #torch.save()
         # print('PSNR is {}'.format(psnr))
