@@ -248,7 +248,7 @@ def validate(config):
 
             # to_img(revNormalize(It_warp.cpu()[0]).clamp(0.0, 1.0)).save(store_path + '/' + folder[1][0] + '/' + index[1][0] + '.png')
             if (ii % 20 == 0):
-                to_img(It_warp.cpu()[0]).clamp(0.0, 1.0).save(store_path + '/' + str(ii) + '.jpg')
+                to_img(It_warp.cpu()[0].clamp(0.0, 1.0)).save(store_path + '/' + str(ii) + '.jpg')
                 to_img(ITs[0]).save(store_path + '/' + str(ii) + '-.jpg')
             ii += 1
 
@@ -277,7 +277,7 @@ if __name__ == "__main__":
 
     for epoch in range(0, config.max_epoch):
 
-        train(config)
+        # train(config)
         psnr, ssim = validate(config)
         #torch.save()
         # print('PSNR is {}'.format(psnr))
