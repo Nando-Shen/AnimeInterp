@@ -172,6 +172,9 @@ if __name__ == "__main__":
         labelMap1 = squeeze_label_map(fillMap1)
         labelMap3 = squeeze_label_map(fillMap3)
 
+        print("labelmap1 shape %s", labelMap1.shape)
+        print("labelmap3 shape %s", labelMap3.shape)
+
         # save flows
         if not os.path.exists(saveFolder):
             os.mkdir(saveFolder)
