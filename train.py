@@ -29,7 +29,7 @@ from skimage.metrics import structural_similarity as ssim
 # loading configures
 parser = argparse.ArgumentParser()
 parser.add_argument('config')
-args = parser.parse_args()
+args = parser.parse_arzgs()
 config = Config.from_file(args.config)
 device = torch.device('cuda' if config.cuda else 'cpu')
 
@@ -50,9 +50,9 @@ revtrans = TF.Compose([revnormalize1, revnormalize2, TF.ToPILImage()])
 if not os.path.exists(config.store_path):
     os.mkdir(config.store_path)
 
-testset = datas.AniTriplet(config.testset_root, trans, config.test_size,
+testset = datas.AniTripletWithSGMFlowTest(config.testset_root, trans, config.test_size,
                                           config.test_crop_size, train=False)
-trainset = datas.AniTriplet(config.trainset_root, trans, config.train_size,
+trainset = datas.AniTripletWithSGMFlow(config.trainset_root, trans, config.train_size,
                                           config.test_crop_size, train=False)
 sampler = torch.utils.data.SequentialSampler(testset)
 trainsampler = torch.utils.data.SequentialSampler(trainset)
@@ -67,7 +67,7 @@ print(trainset)
 sys.stdout.flush()
 
 # prepare model
-model = getattr(models, config.model)(config.pwc_path)
+model = getattr(models, config.model)
 model = torch.nn.DataParallel(model).to(device)
 # scaler = GradScaler()
 
@@ -115,8 +115,8 @@ def train(config):
         if (validationIndex % 200 == 0):
             print('Training {}/{}-th group...'.format(validationIndex, len(testset)))
 
-        # sample, flow = validationData
-        sample = validationData
+        sample, flow = validationData
+        # sample = validationData
 
         frame0 = None
         frame1 = sample[0]
@@ -126,10 +126,10 @@ def train(config):
         # folders.append(folder[0][0])
 
         # initial SGM flow
-        # F12i, F21i = flow
+        F12i, F21i = flow
 
-        # F12i = F12i.float().cuda()
-        # F21i = F21i.float().cuda()
+        F12i = F12i.float().cuda()
+        F21i = F21i.float().cuda()
 
         ITs = sample[1]
         I1 = frame1.cuda()
