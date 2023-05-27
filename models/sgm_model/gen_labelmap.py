@@ -51,21 +51,21 @@ def trapped_ball_processed(binary, in_image=None, do_merge=True):
     fill = trapped_ball_fill_multi(result, 3, method='max')
     fills += fill
     result = mark_fill(result, fill)
-    print('result num 3: ', len(fills))
+    # print('result num 3: ', len(fills))
     
     fill = trapped_ball_fill_multi(result, 2, method=None)
     fills += fill
     result = mark_fill(result, fill)
-    print('result num 2: ', len(fills))
+    # print('result num 2: ', len(fills))
     
     fill = trapped_ball_fill_multi(result, 1, method=None)
     fills += fill
     result = mark_fill(result, fill)
-    print('result num 1: ', len(fills))
+    # print('result num 1: ', len(fills))
 
     fill = flood_fill_multi(result)
     fills += fill
-    print('flood_fill_multi num 1: ', len(fills))
+    # print('flood_fill_multi num 1: ', len(fills))
 
     fillmap = build_fill_map(result, fills)
 #     print('fillmap num: ', len(np.unique(fillmap)))
